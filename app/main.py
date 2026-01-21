@@ -1,11 +1,26 @@
-from fastapi import FastAPI
-from app.api import device_ws, frontend_ws
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
-app = FastAPI(title="Device Monitoring Backend")
+app = FastAPI()
 
-app.include_router(device_ws.router)
-app.include_router(frontend_ws.router)
 
 @app.get("/")
-async def root():
-    return {"message": "Welcome to the Device Monitoring Backend!"}
+def home():
+    return {"message": "FastAPI WebSocket Server Running"}
+
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    print("Client connected")
+
+    try:
+        while True:
+            data = await websocket.receive_text()
+            print("Received:", data)
+
+            # send back to client
+            await websocket.send_text(f"Server received: {data}")
+
+    except WebSocketDisconnect:
+        print("Client disconnected")
+
