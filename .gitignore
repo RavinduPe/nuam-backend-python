@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+*.egg
+*.pytest_cache/
+*.mypy_cache/
+*.coverage
+*.log
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# dotenv file (contains secrets)
+.env
+
+# Database files (if any local SQLite)
+*.db
+*.sqlite3
+
+# Logs
+logs/
+*.log
+
+# Misc
+__pycache__/
+*.bak
+*.swp
+*.tmp
