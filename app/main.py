@@ -1,29 +1,17 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from app.core.database import Base, engine
+from fastapi import FastAPI, WebSocket
+from app.api.device_ws import device_websocket
+# from app.api.frontend_ws import frontend_websocket
+from app.core.database import engine
+from app.models.device_event import Base
 
-app = FastAPI()
+app = FastAPI(title="Network Device Monitoring")
 
 Base.metadata.create_all(bind=engine)
 
+@app.websocket("/ws/device")
+async def ws_device(websocket: WebSocket):
+    await device_websocket(websocket)
 
-@app.get("/")
-def home():
-    return {"message": "FastAPI WebSocket Server Running"}
-
-
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    print("Client connected")
-
-    try:
-        while True:
-            data = await websocket.receive_text()
-            print("Received:", data)
-
-            # send back to client
-            await websocket.send_text(f"Server received: {data}")
-
-    except WebSocketDisconnect:
-        print("Client disconnected")
-
+# @app.websocket("/ws/frontend")
+# async def ws_frontend(websocket: WebSocket):
+#     await frontend_websocket(websocket)

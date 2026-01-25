@@ -1,31 +1,33 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import WebSocket, WebSocketDisconnect
 from sqlalchemy.orm import Session
 from app.core.database import SessionLocal
 from app.models.device_event import DeviceEvent
-from app.services.websocket_manager import ConnectionManager
+from app.schemas.device_event import DeviceEventCreate
+from app.services.websocket_manager import manager
 
-router = APIRouter()
-manager = ConnectionManager()
-
-@router.websocket("/ws/device")
-async def device_ws(websocket: WebSocket):
+async def device_websocket(websocket: WebSocket):
     await websocket.accept()
     db: Session = SessionLocal()
 
     try:
         while True:
             data = await websocket.receive_json()
+            event = DeviceEventCreate(**data)
 
-            event = DeviceEvent(
-                device_id=data["device_id"],
-                event_type=data["event_type"]
+            db_event = DeviceEvent(
+                device_id=event.device_id,
+                event_type=event.event_type,
+                uptime=event.uptime,
+                traffic=event.traffic
             )
 
-            db.add(event)
+            db.add(db_event)
             db.commit()
 
-            # Send event to frontend users
+            # Broadcast to frontend
             await manager.broadcast(data)
 
     except WebSocketDisconnect:
+        print("Device service disconnected")
+    finally:
         db.close()
