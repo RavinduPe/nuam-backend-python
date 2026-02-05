@@ -1,8 +1,7 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from app.services.websocket_manager import WebSocketManager
+from app.services.websocket_manager import manager
 
 router = APIRouter()
-manager = WebSocketManager()
 
 @router.websocket("/ws/frontend")
 async def frontend_ws(websocket: WebSocket):

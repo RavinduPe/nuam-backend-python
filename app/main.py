@@ -5,6 +5,7 @@ from app.core.database import engine, get_db
 from app.models.device_event import Base
 from app.models.device_event import Device, DeviceEvent
 from sqlalchemy.orm import Session
+from app.services.websocket_manager import manager
 
 from datetime import datetime
 import json
@@ -28,46 +29,47 @@ async def device_ws(ws: WebSocket):
             raw = await ws.receive_text()
             event = json.loads(raw)
 
-            print("[DEVICE EVENT]", event)
+            print("[DEVICE EVENT 2 : ]")
 
-            # ---- store raw event ----
-            meta = event.get("meta", {})
-            payload = event.get("payload", {})
+            # # ---- store raw event ----
+            # meta = event["meta"]
+            # payload = event["payload"]
 
-            db_event = DeviceEvent(
-                event_type=payload.get("event_type"),
-                timestamp=datetime.fromisoformat(
-                    payload.get("timestamp").replace("Z", "+00:00")
-                ),
-                sequence=meta.get("sequence"),
-                payload=payload
-            )
-            db.add(db_event)
+            # db_event = DeviceEvent(
+            #     event_type=payload["event_type"],
+            #     timestamp=datetime.fromisoformat(
+            #         payload["timestamp"].replace("Z", "+00:00")
+            #     ),
+            #     sequence=meta["sequence"],
+            #     payload=payload
+            # )
+            # db.add(db_event)
 
-            # ---- update device table ----
-            device_data = payload.get("device", {})
-            mac = device_data.get("device_id")
+            # # ---- update device table ----
+            # device_data = payload["device"]
+            # mac = device_data["device_id"]
 
-            if mac:
-                device = db.query(Device).filter(Device.mac == mac).first()
-                if not device:
-                    device = Device(mac=mac)
-                    db.add(device)
+            # if mac:
+            #     device = db.query(Device).filter(Device.mac == mac).first()
+            #     if not device:
+            #         device = Device(mac=mac)
+            #         db.add(device)
 
-                device.ip_address = device_data.get("ip_address")
-                device.hostname = device_data.get("hostname")
-                device.device_type = device_data.get("device_type")
-                device.vendor = device_data.get("vendor")
-                device.os = device_data.get("os")
-                device.first_seen = datetime.fromisoformat(
-                    device_data.get("first_seen").replace("Z", "+00:00")
-                )
-                device.last_seen = datetime.fromisoformat(
-                    device_data.get("last_seen").replace("Z", "+00:00")
-                )
-                device.status = payload.get("event_type")
+            #     device.ip_address = device_data.get("ip_address")
+            #     device.hostname = device_data.get("hostname")
+            #     device.device_type = device_data.get("device_type")
+            #     device.vendor = device_data.get("vendor")
+            #     device.os = device_data.get("os")
+            #     device.first_seen = datetime.fromisoformat(
+            #         device_data.get("first_seen").replace("Z", "+00:00")
+            #     )
+            #     device.last_seen = datetime.fromisoformat(
+            #         device_data.get("last_seen").replace("Z", "+00:00")
+            #     )
+            #     device.status = payload.get("event_type")
 
-            db.commit()
+            # db.commit()
+            await manager.broadcast(event)
 
     except WebSocketDisconnect:
         print("WebSocket disconnected")
