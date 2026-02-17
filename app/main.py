@@ -31,11 +31,20 @@ async def device_ws(websocket: WebSocket):
         while True:
             data = await websocket.receive_json()
 
-            # SAVE TO DATABASE
+            # Save event to DB
             processor.process_event(data)
 
-            # BROADCAST TO FRONTEND
-            await manager.broadcast(data)
+            # Calculate dashboard stats
+            stats = processor.get_dashboard_stats()
+
+            # Attach stats to outgoing message
+            enriched_data = {
+                "event": data,
+                "dashboard_stats": stats
+            }
+
+            # Broadcast enriched message
+            await manager.broadcast(enriched_data)
 
     except WebSocketDisconnect:
         manager.disconnect(websocket)
