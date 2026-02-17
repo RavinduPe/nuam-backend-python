@@ -5,6 +5,9 @@ from app.models.device import Device
 from app.models.device_event import DeviceEvent
 from app.models.network_metrics import NetworkMetric
 
+from datetime import datetime, timedelta
+from sqlalchemy import func
+
 class EventProcessor:
 
     def __init__(self, db: Session):
@@ -118,6 +121,45 @@ class EventProcessor:
 
         self.db.add(metric_row)
         self.db.commit()
+        
+
+    def get_dashboard_stats(self):
+
+        today = datetime.utcnow().date()
+
+        # New devices today
+        new_devices_today = self.db.query(Device).filter(func.date(Device.first_seen) == today).count()
+
+        # Inactive devices (time-based)
+        threshold = datetime.utcnow() - timedelta(minutes=5)
+
+        inactive_devices = self.db.query(Device).filter(Device.status=="INACTIVE").count()
+
+        total_devices = self.db.query(Device).count()
+
+        active_devices = self.db.query(Device).filter(Device.status=="ACTIVE").count()
+
+        return {
+            "new_devices_today": new_devices_today,
+            "inactive_devices": inactive_devices,
+            "active_devices": active_devices,
+            "total_devices": total_devices
+        }
+        
+    def sync_devices_from_engine(self, active_device_ids: list):
+        for mac in active_device_ids:
+            device = self.db.query(Device).filter(Device.device_id == mac).first()
+            if not device:
+                new_device = Device(
+                    device_id=mac,
+                    first_seen=datetime.utcnow(),
+                    last_seen=datetime.utcnow(),
+                    status="ACTIVE"
+                )
+                self.db.add(new_device)
+        self.db.commit()
+
+
 
 
             
