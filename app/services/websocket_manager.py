@@ -15,7 +15,19 @@ class WebSocketManager:
 
     async def broadcast(self, message: dict):
         print("Broadcasting message to frontend clients:", message)
+
+        disconnected_connections = []
+
         for connection in self.active_connections:
-            await connection.send_json(message)
+            try:
+                await connection.send_json(message)
+            except Exception as e:
+                print("WebSocket error:", e)
+                disconnected_connections.append(connection)
+
+        # Remove broken connections
+        for connection in disconnected_connections:
+            self.disconnect(connection)
+
 
 manager = WebSocketManager()
