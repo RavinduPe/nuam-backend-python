@@ -43,3 +43,6 @@ __pycache__/
 *.bak
 *.swp
 *.tmp
+
+#genarated report files
+reports/
