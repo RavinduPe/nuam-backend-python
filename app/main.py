@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket, Depends,WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, Depends, WebSocketDisconnect
 from app.core.database import SessionLocal
 from app.api.frontend_ws import frontend_ws
 from app.core.database import engine, get_db
@@ -7,13 +7,17 @@ from app.models.device_event import DeviceEvent
 from sqlalchemy.orm import Session
 from app.services.websocket_manager import manager
 from app.services.event_processor import EventProcessor
-
 from datetime import datetime
-import json
+from app.api import analytics
+from app.api import topology_router
 
 app = FastAPI(title="Network Device Monitoring")
 
 Base.metadata.create_all(bind=engine)
+
+app.include_router(analytics.router)
+
+app.include_router(topology_router.router)
 
 @app.get("/device-events")
 def get_device_events(db: Session = Depends(get_db)):
@@ -48,8 +52,8 @@ async def device_ws(websocket: WebSocket):
 
     except WebSocketDisconnect:
         manager.disconnect(websocket)
-
-
+    finally:
+        db.close()
 
 @app.websocket("/ws/frontend")
 async def ws_frontend(websocket: WebSocket):

@@ -24,8 +24,7 @@ class WebSocketManager:
             except Exception as e:
                 print("WebSocket error:", e)
                 disconnected_connections.append(connection)
-
-        # Remove broken connections
+         # Remove broken connections
         for connection in disconnected_connections:
             self.disconnect(connection)
 
