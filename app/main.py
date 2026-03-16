@@ -84,7 +84,7 @@ async def device_ws(websocket: WebSocket):
             if data_type == "METRIC" and "metrics" in payload:
                 latest_metrics = payload["metrics"]
                 
-            topology_data = None
+            # topology_data = None
                 
             if data["type"] == "TOPOLOGY" and "topology" in data["payload"]:
                 topology_data = build_topology_response(data["payload"]["topology"])
