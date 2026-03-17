@@ -163,15 +163,6 @@ http://127.0.0.1:8000/docs
 ws://localhost:8000/ws/device
 ```
 
-**Message example:**
-
-```json
-{
-  "device_id": "PC-01",
-  "event_type": "connected"
-}
-```
-
 ---
 
 ### ▶ Frontend → Backend
