@@ -32,27 +32,6 @@ async def frontend_ws(websocket):
                     })
                     continue
 
-            from app.services.network_transformer import build_dashboard_response
-            from app.core.database import SessionLocal
-
-            db = SessionLocal()
-
-            try:
-                dashboard = build_dashboard_response({}, {})
-
-                dashboard["networkStats"]["totalIPs"] = network_state.total_ips
-                dashboard["networkStats"]["poolRange"] = network_state.pool_range
-
-                await manager.broadcast({
-                    "networkStats": {
-                        "totalIPs": network_state.total_ips,
-                        "poolRange": network_state.pool_range
-                    }
-                })
-
-            finally:
-                db.close()
-
     except WebSocketDisconnect:
         manager.disconnect(websocket)
         return

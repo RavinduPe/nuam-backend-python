@@ -31,7 +31,9 @@ def build_network_stats(metrics_data: dict, topology: dict):
         "available": available,
         "conflicts": conflicts,
         "unauthorized": unauthorized,
-        "poolRange": network_state.pool_range
+        "poolRange": network_state.pool_range,
+        "base_ip" : network_state.base_ip,
+        "subnet_mask": network_state.subnet_mask
     }
 
 # Build IP Devices
